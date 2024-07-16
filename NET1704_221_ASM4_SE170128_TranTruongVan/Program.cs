@@ -1,7 +1,13 @@
 using System.Text.Json;
+using Microsoft.Extensions.Hosting.WindowsServices;
 using NET1704_221_ASM4_SE170128_TranTruongVan;
 
 var builder = WebApplication.CreateBuilder(args);
+
+if (WindowsServiceHelpers.IsWindowsService())
+{
+    builder.Host.UseWindowsService();
+}
 
 builder.Services.AddSingleton<TeachingScheduleStorage>();
 builder.Services.AddHostedService<RemoveDeletedTeachingScheduleWorker>();
@@ -14,8 +20,5 @@ app.MapPost("/schedules", (TeachingSchedule schedule, TeachingScheduleStorage st
     storage.InsertSchedules([schedule]);
     return Results.Ok();
 });
-
-var scheduleStorage = app.Services.GetRequiredService<TeachingScheduleStorage>();
-scheduleStorage.InsertSchedules(InitialData.Schedules);
 
 await app.RunAsync();
